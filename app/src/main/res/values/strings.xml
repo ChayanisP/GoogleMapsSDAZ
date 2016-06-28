@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MapTest</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="move_the_camera">Move the camera</string>
+    <string name="isDrag">is drag?</string>
+    <string name="tap_instructions">Tap or long press</string>
+</resources>
