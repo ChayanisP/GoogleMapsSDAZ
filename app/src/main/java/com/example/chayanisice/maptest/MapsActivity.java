@@ -88,5 +88,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void noDrag() {
         //dragDetection.setText("no dragging");
         mMap.moveCamera(CameraUpdateFactory.zoomTo(12));
+        //comment
     }
 }
