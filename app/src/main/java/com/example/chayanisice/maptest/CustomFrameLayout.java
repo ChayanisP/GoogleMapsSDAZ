@@ -15,8 +15,10 @@ public class CustomFrameLayout extends FrameLayout {
     private GestureDetector gestureDetector;
     private DragCallback dragListener;
     private boolean isScrolling = false;
-    private long previousEvent;
-    private float previousX, previousY;
+    private boolean isFling = false;
+
+    private final int SWIPE_MIN_DISTANCE = 120;
+    private final int SWIPE_THRESHOLD_VELOCITY = 200;
 
     public CustomFrameLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -24,8 +26,10 @@ public class CustomFrameLayout extends FrameLayout {
     }
 
     public interface DragCallback {
-        void onDrag(double distance, long time, float prevX, float prevY, float curX, float curY);
+        //void onDrag(double distance, long time, float prevX, float prevY, float curX, float curY);
+        void onDrag();
         void noDrag();
+        void onFling();
     }
 
     public void setOnDragListener(DragCallback listener) {
@@ -36,9 +40,14 @@ public class CustomFrameLayout extends FrameLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         gestureDetector.onTouchEvent(ev);
         if(ev.getAction() == MotionEvent.ACTION_UP) {
-            if(isScrolling ) {
+            if(isScrolling) {
                 isScrolling  = false;
-                dragListener.noDrag();
+                if(!isFling)
+                    dragListener.noDrag();
+            }
+            if(isFling){
+                isFling = false;
+                //dragListener.noDrag();
             }
         }
         return false;
@@ -47,27 +56,36 @@ public class CustomFrameLayout extends FrameLayout {
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
         @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2,
-                                float distanceX, float distanceY) {
-            long timeDiff;
-            double distance;
-
-            //that's when user starts dragging
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if(dragListener != null) {
-                if(isScrolling == false){
-                    previousEvent = e1.getEventTime();
-                    previousX = e1.getX();
-                    previousY = e1.getY();
-                }
                 isScrolling = true;
+                dragListener.onDrag();
+            }
+            return false;
+        }
 
-                timeDiff = e2.getEventTime()-previousEvent;
-                distance = Math.sqrt(Math.pow(distanceX,2)+Math.pow(distanceY,2));
-                dragListener.onDrag(distance, timeDiff, previousX, previousY, e2.getX(), e2.getY());
-
-                previousEvent = e2.getEventTime();
-                previousX = e2.getX();
-                previousY = e2.getY();
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY){
+            if(dragListener != null) {
+                isFling = true;
+                if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    // Right to left, your code here
+                    dragListener.onFling();
+                    return true;
+                } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) >  SWIPE_THRESHOLD_VELOCITY) {
+                    // Left to right, your code here
+                    dragListener.onFling();
+                    return true;
+                }
+                if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                    // Bottom to top, your code here
+                    dragListener.onFling();
+                    return true;
+                } else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                    // Top to bottom, your code here
+                    dragListener.onFling();
+                    return true;
+                }
             }
             return false;
         }
