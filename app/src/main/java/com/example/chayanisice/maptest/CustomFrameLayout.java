@@ -40,10 +40,9 @@ public class CustomFrameLayout extends FrameLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         gestureDetector.onTouchEvent(ev);
         if(ev.getAction() == MotionEvent.ACTION_UP) {
-            if(isScrolling) {
+            if(isScrolling && !isFling) {
                 isScrolling  = false;
-                if(!isFling)
-                    dragListener.noDrag();
+                dragListener.noDrag();
             }
             if(isFling){
                 isFling = false;

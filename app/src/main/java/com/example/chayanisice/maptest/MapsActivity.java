@@ -69,12 +69,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapClick(LatLng point) {
-        mTapTextView.setText("tapped, point=" + point);
+        //mTapTextView.setText("tapped, point=" + point);
     }
 
     @Override
     public void onMapLongClick(LatLng point) {
-        mTapTextView.setText("long pressed, point=" + point);
+        //mTapTextView.setText("long pressed, point=" + point);
     }
 
     @Override
