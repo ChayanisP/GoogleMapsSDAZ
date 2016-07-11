@@ -17,8 +17,8 @@ public class CustomFrameLayout extends FrameLayout {
     private boolean isScrolling = false;
     private boolean isFling = false;
 
-    private final int SWIPE_MIN_DISTANCE = 120;
-    private final int SWIPE_THRESHOLD_VELOCITY = 200;
+    private final int SWIPE_MIN_DISTANCE = 100;
+    private final int SWIPE_THRESHOLD_VELOCITY = 180;
 
     public CustomFrameLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -38,15 +38,17 @@ public class CustomFrameLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        gestureDetector.onTouchEvent(ev);
-        if(ev.getAction() == MotionEvent.ACTION_UP) {
-            if(isScrolling && !isFling) {
-                isScrolling  = false;
-                dragListener.noDrag();
-            }
-            if(isFling){
-                isFling = false;
-                //dragListener.noDrag();
+        if(ev.getPointerCount() == 1){
+            gestureDetector.onTouchEvent(ev);
+            if(ev.getAction() == MotionEvent.ACTION_UP) {
+                if(isScrolling && !isFling) {
+                    isScrolling  = false;
+                    dragListener.noDrag();
+                }
+                if(isFling){
+                    isFling = false;
+                    //dragListener.noDrag();
+                }
             }
         }
         return false;
@@ -67,24 +69,29 @@ public class CustomFrameLayout extends FrameLayout {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY){
             if(dragListener != null) {
                 isFling = true;
-                if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                dragListener.onFling();
+                /*if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                     // Right to left, your code here
+                    isFling = true;
                     dragListener.onFling();
                     return true;
                 } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) >  SWIPE_THRESHOLD_VELOCITY) {
                     // Left to right, your code here
+                    isFling = true;
                     dragListener.onFling();
                     return true;
                 }
                 if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                     // Bottom to top, your code here
+                    isFling = true;
                     dragListener.onFling();
                     return true;
                 } else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                     // Top to bottom, your code here
+                    isFling = true;
                     dragListener.onFling();
                     return true;
-                }
+                }*/
             }
             return false;
         }
