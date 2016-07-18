@@ -14,6 +14,8 @@ public class CustomFrameLayout extends FrameLayout {
 
     private GestureDetector gestureDetector;
     private DragCallback dragListener;
+    private MotionEvent preEvent;
+    private boolean startFling = true;
     private boolean isScrolling = false;
     private boolean isFling = false;
 
@@ -29,7 +31,7 @@ public class CustomFrameLayout extends FrameLayout {
         //void onDrag(double distance, long time, float prevX, float prevY, float curX, float curY);
         void onDrag();
         void noDrag();
-        void onFling();
+        void onFling(long time, double speedX, double speedY);
     }
 
     public void setOnDragListener(DragCallback listener) {
@@ -47,6 +49,7 @@ public class CustomFrameLayout extends FrameLayout {
                 }
                 if(isFling){
                     isFling = false;
+                    return true;
                     //dragListener.noDrag();
                 }
             }
@@ -69,7 +72,14 @@ public class CustomFrameLayout extends FrameLayout {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY){
             if(dragListener != null) {
                 isFling = true;
-                dragListener.onFling();
+                if(startFling){
+                    preEvent = e1;
+                }
+                long timeDiff = (e2.getEventTime() - preEvent.getEventTime()); //milliseconds
+                double velocity = Math.sqrt(Math.pow(velocityX, 2) + Math.pow(velocityY, 2)); //pixels per second
+                dragListener.onFling(timeDiff, velocityX, velocityY);
+
+                preEvent = e2;
                 /*if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                     // Right to left, your code here
                     isFling = true;

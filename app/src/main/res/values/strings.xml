@@ -4,4 +4,9 @@
     <string name="move_the_camera">Move the camera</string>
     <string name="isDrag">is drag?</string>
     <string name="tap_instructions">Tap or long press</string>
+    <string name="constant">Constant</string>
+    <string-array name="eqs_array">
+        <item>Formula 1</item>
+        <item>Formula 2</item>
+    </string-array>
 </resources>
