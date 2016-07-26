@@ -14,8 +14,6 @@ public class CustomFrameLayout extends FrameLayout {
 
     private GestureDetector gestureDetector;
     private DragCallback dragListener;
-    private MotionEvent preEvent;
-    private boolean startFling = true;
     private boolean isScrolling = false;
     private boolean isFling = false;
 
@@ -29,9 +27,9 @@ public class CustomFrameLayout extends FrameLayout {
 
     public interface DragCallback {
         //void onDrag(double distance, long time, float prevX, float prevY, float curX, float curY);
-        void onDrag();
+        void onDrag(MotionEvent e1, MotionEvent e2);
         void noDrag();
-        void onFling(long time, double speedX, double speedY);
+        void onFling(double speedX, double speedY);
     }
 
     public void setOnDragListener(DragCallback listener) {
@@ -63,7 +61,7 @@ public class CustomFrameLayout extends FrameLayout {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if(dragListener != null) {
                 isScrolling = true;
-                dragListener.onDrag();
+                dragListener.onDrag(e1, e2);
             }
             return false;
         }
@@ -72,14 +70,8 @@ public class CustomFrameLayout extends FrameLayout {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY){
             if(dragListener != null) {
                 isFling = true;
-                if(startFling){
-                    preEvent = e1;
-                }
-                long timeDiff = (e2.getEventTime() - preEvent.getEventTime()); //milliseconds
-                double velocity = Math.sqrt(Math.pow(velocityX, 2) + Math.pow(velocityY, 2)); //pixels per second
-                dragListener.onFling(timeDiff, velocityX, velocityY);
+                dragListener.onFling(velocityX, velocityY);
 
-                preEvent = e2;
                 /*if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                     // Right to left, your code here
                     isFling = true;

@@ -5,6 +5,7 @@ import com.example.chayanisice.maptest.CustomFrameLayout.DragCallback;
 import android.graphics.Point;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -23,6 +24,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.CameraPosition;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnMapClickListener, OnMapLongClickListener, OnCameraChangeListener, DragCallback {
 
     private GoogleMap mMap;
@@ -31,15 +35,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView dragDetection;
     private EditText constantEditText;
     private boolean isStartDrag;
-    private int formula;
+    private int formula=1;
     private double constant;
 
-    private LatLng prevNPos;
-    private int posCounter;
-    private long prevNTime;
     private float baseZoom;
     private LatLng prevPos;
     private long prevTime;
+    private double startTime;
+
+    private Queue<Event> queue = new LinkedList<Event>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +64,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(parent.getItemAtPosition(position).toString().equalsIgnoreCase("formula 1")) {
+                if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("formula 1")) {
                     formula = 1;
-                } else formula = 2;
+                } else if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("formula 2")) {
+                    formula = 2;
+                }
             }
 
             @Override
@@ -114,93 +120,123 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onDrag() {
-        double zoomLevel;
+    public void onDrag(MotionEvent e1, MotionEvent e2) {
         mCameraTextView.setText("Formula: "+formula+" "+constant);
-        if(formula == 1) zoomLevel = getZoomLevel();
-        else zoomLevel = getZoomLv();
+
+        if(isStartDrag){
+            Event event1 = new Event();
+            event1.setPosX(e1.getX());
+            event1.setPosY(e1.getY());
+            event1.setTime(e1.getEventTime());
+            queue.add(event1);
+        }
+        Event event = new Event();
+        event.setPosX(e2.getX());
+        event.setPosY(e2.getY());
+        event.setTime(e2.getEventTime());
+        queue.add(event);
+
+        while(event.getTime() - queue.peek().getTime() > 1000){
+            queue.remove();
+        }
+
+        float x = queue.peek().getPosX() - event.getPosX();
+        float y = queue.peek().getPosY() - event.getPosY();
+        double dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        double speed = dist/1000*(event.getTime() - queue.peek().getTime());
+
+        dragDetection.setText("one sec speed: "+speed+" size: "+queue.size());
+
+        double zoomLevel = getZoomLevel();
         mMap.animateCamera(CameraUpdateFactory.zoomTo((float) zoomLevel), 7, null);
     }
 
     @Override
     public void noDrag() {
-        //mMap.moveCamera(CameraUpdateFactory.zoomTo(baseZoom));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), 500, null);
         isStartDrag = true;
+        queue.clear();
         mTapTextView.setText("Current: " + mMap.getCameraPosition().zoom);
-        //mCameraTextView.append("Finger up: " + System.currentTimeMillis());
     }
 
     @Override
-    public void onFling(long time, double speedX, double speedY) {
+    public void onFling(double speedX, double speedY) {
         mCameraTextView.setText("Fling");
-        //CameraPosition cameraPosition = CameraPosition.builder().target(mMap.getCameraPosition().target).zoom(15).bearing(mMap.getCameraPosition().bearing).build();
-        //mMap.getUiSettings().setAllGesturesEnabled(false);
 
         LatLng currentTarget = mMap.getCameraPosition().target;
         Point screenPoint = mMap.getProjection().toScreenLocation(currentTarget);
-        Point newPoint = new Point(screenPoint.x - (int)(speedX*time/1000), screenPoint.y - (int)(speedY*time/1000));
+        Point newPoint = new Point(screenPoint.x - (int)(speedX/4), screenPoint.y - (int)(speedY/4));
         LatLng mapNewTarget = mMap.getProjection().fromScreenLocation(newPoint);
 
-        mCameraTextView.append(screenPoint.x + "," + screenPoint.y + " disX: " + (int) (speedX * time / 1000) + " disY: " + (int) (speedY * time / 1000) +
-                " time: " + time + " speedX: " + speedX + " speedY " + speedY);
+        mCameraTextView.append(screenPoint.x + "," + screenPoint.y + " speedX: " + speedX + " speedY " + speedY);
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(mapNewTarget), 500, new GoogleMap.CancelableCallback() {
-
+        float curZoom = mMap.getCameraPosition().zoom;
+        float tempZoom = curZoom + (baseZoom - curZoom)/4;
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget,tempZoom), 500, new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), 2000, null);
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), 4000, null);
             }
-
             @Override
             public void onCancel() {
-
             }
         });
-        //mMap.moveCamera(CameraUpdateFactory.zoomTo(baseZoom));
+
         mTapTextView.setText("Current1: " + mMap.getCameraPosition().zoom);
     }
 
     public double getZoomLevel(){
         CameraPosition currentCamera = mMap.getCameraPosition();
         long currentTime = System.currentTimeMillis();
-        constant = 0.06;
-        if(!constantEditText.getText().toString().equals(""))    constant = Double.parseDouble(constantEditText.getText().toString());
 
         if(isStartDrag){
             isStartDrag = false;
             baseZoom = currentCamera.zoom;
             prevPos = currentCamera.target;
             prevTime = currentTime;
-            posCounter = 0;
-            prevNPos = currentCamera.target;
-            prevNTime = currentTime;
+            startTime = currentTime;
         }
 
-        double distance = distance(prevPos.latitude, prevPos.longitude, currentCamera.target.latitude, currentCamera.target.longitude);
+        double distance1 = distance(prevPos.latitude, prevPos.longitude, currentCamera.target.latitude, currentCamera.target.longitude);
+
+        double LatDiff = Math.abs(prevPos.latitude - currentCamera.target.latitude);
+        double LngDiff = Math.abs(prevPos.longitude - currentCamera.target.longitude);
+        double distance2 = Math.sqrt(Math.pow(LatDiff, 2) + Math.pow(LngDiff, 2));
+
         double time = currentTime - prevTime;
+
+        double speed1, speed2;
+        if(time == 0) { speed1 = 0; speed2 = 0; }
+        else {
+            speed1 = distance1/time;
+            speed2 = distance2/time;
+        }
+
         double zoomLevel;
-        if(distance == 0)   zoomLevel = baseZoom;
-        else zoomLevel = Math.min(Math.log(156.543*constant*time/distance)/Math.log(2),baseZoom);
+
+        switch (formula){
+            case 1:
+                constant = 0.06;
+                if(!constantEditText.getText().toString().equals(""))    constant = Double.parseDouble(constantEditText.getText().toString());
+                F1ZoomCaculator f1 = new F1ZoomCaculator();
+                zoomLevel = f1.getZoom(speed1, constant, baseZoom);
+                break;
+            case 2:
+                constant = 0.36;
+                if(!constantEditText.getText().toString().equals(""))    constant = Double.parseDouble(constantEditText.getText().toString());
+                F2ZoomCaculator f2 = new F2ZoomCaculator();
+                zoomLevel = f2.getZoom(speed2, constant, baseZoom);
+                break;
+            default:
+                constant = 0.06;
+                if(!constantEditText.getText().toString().equals(""))    constant = Double.parseDouble(constantEditText.getText().toString());
+                F1ZoomCaculator fdef = new F1ZoomCaculator();
+                zoomLevel = fdef.getZoom(speed1, constant, baseZoom);
+                break;
+        }
 
         mTapTextView.setText("Current: " + currentCamera.zoom + " ZL: " + zoomLevel + " base: " + baseZoom);
-        //mCameraTextView.setText(""+distance);
-        //mMap.animateCamera(CameraUpdateFactory.zoomTo((float)zoomLevel), 10, null);
 
-        if(posCounter % 20 == 0){
-            double distanceN = distance(prevNPos.latitude, prevNPos.longitude, currentCamera.target.latitude, currentCamera.target.longitude);
-            double timeN = currentTime - prevNTime;
-
-            if(distanceN == 0)   zoomLevel = baseZoom;
-            else zoomLevel = Math.min(Math.log(156.543*constant*timeN/distanceN)/Math.log(2),baseZoom);
-
-            dragDetection.setText("zoom level for many events: "+zoomLevel);
-
-            prevNTime = currentTime;
-            prevNPos = currentCamera.target;
-        }
-
-        posCounter++;
         prevPos = currentCamera.target;
         prevTime = currentTime;
 
@@ -218,43 +254,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double dist = (earthRadius * c)/1000; //km
 
         return dist;
-    }
-
-    public double getZoomLv() {
-        long timeDiff;
-        double distance, LatDiff, LngDiff, velocity, zoomLevel, temp;
-        CameraPosition currentCamera = mMap.getCameraPosition();
-        long currentTime = System.currentTimeMillis();
-        constant = 0.36;
-        if(!constantEditText.getText().toString().equals(""))    constant = Double.parseDouble(constantEditText.getText().toString());
-
-        if (isStartDrag){
-            isStartDrag = false;
-            baseZoom = currentCamera.zoom;
-            prevPos = currentCamera.target;
-            prevTime = currentTime;
-        }
-        timeDiff = currentTime - prevTime;
-        LatDiff = Math.abs(prevPos.latitude - currentCamera.target.latitude);
-        LngDiff = Math.abs(prevPos.longitude - currentCamera.target.longitude);
-
-        distance = Math.sqrt(Math.pow(LatDiff, 2) + Math.pow(LngDiff, 2));
-        if(timeDiff == 0)   velocity = 0;
-        else velocity = distance/timeDiff;
-
-        //dragDetection.setText("Velocity: " + velocity+"dis: "+distance);
-
-        temp = Math.max(velocity,constant/Math.pow(2,baseZoom));
-        zoomLevel = Math.log(constant/temp)/Math.log(2);
-
-        mTapTextView.setText("Current: " + currentCamera.zoom + " ZL: " + zoomLevel + " base: " + baseZoom);
-
-        //mMap.animateCamera(CameraUpdateFactory.zoomTo((float)zoomLevel), 10, null);
-
-        prevPos = currentCamera.target;
-        prevTime = currentTime;
-
-        return zoomLevel;
     }
 
 
