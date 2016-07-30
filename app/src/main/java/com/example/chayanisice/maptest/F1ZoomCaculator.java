@@ -5,27 +5,37 @@ package com.example.chayanisice.maptest;
  */
 
 interface ZoomCalculator {
-    double getZoom (double speed, double constant, float baseZoom);
+    double getZoom (double speed, float baseZoom);
 }
 
 class F1ZoomCaculator implements ZoomCalculator{
+
+    private double constant;
+    public F1ZoomCaculator (double constant){
+        this.constant = constant;
+    }
+
     @Override
-    public double getZoom(double speed, double constant, float baseZoom) {
+    public double getZoom(double speed, float baseZoom) {
         double zoomLevel;
         if(speed == 0)   zoomLevel = baseZoom;
-        else zoomLevel = Math.min(Math.log(156.543*constant/speed)/Math.log(2),baseZoom);
+        else zoomLevel = Math.min(Math.log(1.40625*constant/speed)/Math.log(2),baseZoom);
         return zoomLevel;
     }
 }
 
 class F2ZoomCaculator implements ZoomCalculator{
+
+    private double constant;
+    public F2ZoomCaculator (double constant){
+        this.constant = constant;
+    }
     @Override
-    public double getZoom(double speed, double constant, float baseZoom) {
+    public double getZoom(double speed, float baseZoom) {
         double zoomLevel;
         if(speed == 0)   zoomLevel = baseZoom;
         else {
-            double temp = Math.max(speed,constant/Math.pow(2,baseZoom));
-            zoomLevel = Math.log(constant/temp)/Math.log(2);
+            zoomLevel = Math.min(Math.log(constant/speed)/Math.log(2),baseZoom);
         }
         return zoomLevel;
     }

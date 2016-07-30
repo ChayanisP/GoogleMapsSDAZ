@@ -17,8 +17,8 @@ public class CustomFrameLayout extends FrameLayout {
     private boolean isScrolling = false;
     private boolean isFling = false;
 
-    private final int SWIPE_MIN_DISTANCE = 100;
-    private final int SWIPE_THRESHOLD_VELOCITY = 180;
+    //private final int SWIPE_MIN_DISTANCE = 100;
+    //private final int SWIPE_THRESHOLD_VELOCITY = 180;
 
     public CustomFrameLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -27,7 +27,7 @@ public class CustomFrameLayout extends FrameLayout {
 
     public interface DragCallback {
         //void onDrag(double distance, long time, float prevX, float prevY, float curX, float curY);
-        void onDrag(MotionEvent e1, MotionEvent e2);
+        void onDrag(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY);
         void noDrag();
         void onFling(double speedX, double speedY);
     }
@@ -47,8 +47,7 @@ public class CustomFrameLayout extends FrameLayout {
                 }
                 if(isFling){
                     isFling = false;
-                    return true;
-                    //dragListener.noDrag();
+                    return true; //consume fling events
                 }
             }
         }
@@ -61,7 +60,7 @@ public class CustomFrameLayout extends FrameLayout {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if(dragListener != null) {
                 isScrolling = true;
-                dragListener.onDrag(e1, e2);
+                dragListener.onDrag(e1, e2, distanceX, distanceY);
             }
             return false;
         }

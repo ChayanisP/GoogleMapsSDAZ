@@ -31,26 +31,45 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-    <LinearLayout
+        <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:orientation="horizontal"
         android:weightSum="1" >
+            <EditText
+            android:id="@+id/constant_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:hint="@string/constant"
+            android:inputType="numberDecimal" />
             <Spinner
                 android:id="@+id/eqs_spinner"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:gravity="center" />
-
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:weightSum="1" >
             <EditText
-                android:id="@+id/constant_text"
+                android:id="@+id/time_text"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:hint="@string/constant"
+                android:hint="@string/time"
                 android:inputType="numberDecimal" />
+            <Spinner
+                android:id="@+id/tspd_spinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center" />
         </LinearLayout>
 
     </LinearLayout>

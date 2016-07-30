@@ -5,8 +5,14 @@
     <string name="isDrag">is drag?</string>
     <string name="tap_instructions">Tap or long press</string>
     <string name="constant">Constant</string>
+    <string name="time">Time (second)</string>
     <string-array name="eqs_array">
-        <item>Formula 1</item>
-        <item>Formula 2</item>
+        <item>Ground speed 1</item>
+        <item>Ground speed 2</item>
+        <item>Screen speed</item>
+    </string-array>
+    <string-array name="tspd_array">
+        <item>Default</item>
+        <item>Time based speed</item>
     </string-array>
 </resources>

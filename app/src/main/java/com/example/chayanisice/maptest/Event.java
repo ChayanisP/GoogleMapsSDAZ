@@ -4,11 +4,17 @@ package com.example.chayanisice.maptest;
  * Created by chayanisice on 7/26/16.
  */
 public class Event {
-    private float posX;
-    private float posY;
+    private double posX;
+    private double posY;
     private double time;
 
-    public float getPosX() {
+    public Event(double posX, double posY, double time){
+        this.posX = posX;
+        this.posY = posY;
+        this.time = time;
+    }
+
+    public double getPosX() {
         return posX;
     }
 
@@ -16,7 +22,7 @@ public class Event {
         this.posX = posX;
     }
 
-    public float getPosY() {
+    public double getPosY() {
         return posY;
     }
 
