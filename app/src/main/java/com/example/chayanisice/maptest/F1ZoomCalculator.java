@@ -8,10 +8,10 @@ interface ZoomCalculator {
     double getZoom (double speed, float baseZoom);
 }
 
-class F1ZoomCaculator implements ZoomCalculator{
+class F1ZoomCalculator implements ZoomCalculator{
 
     private double constant;
-    public F1ZoomCaculator (double constant){
+    public F1ZoomCalculator(double constant){
         this.constant = constant;
     }
 
@@ -24,10 +24,10 @@ class F1ZoomCaculator implements ZoomCalculator{
     }
 }
 
-class F2ZoomCaculator implements ZoomCalculator{
+class F2ZoomCalculator implements ZoomCalculator{
 
     private double constant;
-    public F2ZoomCaculator (double constant){
+    public F2ZoomCalculator(double constant){
         this.constant = constant;
     }
     @Override

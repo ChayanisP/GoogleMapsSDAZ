@@ -35,7 +35,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView dragDetection;
     private EditText constantEditText;
     private EditText timeEditText;
-    private boolean isStartDrag;
+    private boolean isStartDrag=true;
     private int formula=1;
     private double constant;
     private double inputTime;
@@ -45,8 +45,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private long prevTime;
     private long ptime;
 
-    private F1ZoomCaculator currentZoomCalculator1 = new F1ZoomCaculator(0.06);
-    private F2ZoomCaculator currentZoomCalculator2 = new F2ZoomCaculator(0.36);
+    private F1ZoomCalculator currentZoomCalculator1 = new F1ZoomCalculator(0.06);
+    private F2ZoomCalculator currentZoomCalculator2 = new F2ZoomCalculator(0.36);
 
     private Queue<Event> squeue = new LinkedList<Event>();
     private Queue<Event> gqueue = new LinkedList<Event>();
@@ -83,19 +83,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     constant = 0.06;
                     if (!constantEditText.getText().toString().equals(""))
                         constant = Double.parseDouble(constantEditText.getText().toString());
-                    currentZoomCalculator1 = new F1ZoomCaculator(constant);
+                    currentZoomCalculator1 = new F1ZoomCalculator(constant);
                 } else if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("ground speed 2")) {
                     formula = 2;
                     constant = 0.36;
                     if (!constantEditText.getText().toString().equals(""))
                         constant = Double.parseDouble(constantEditText.getText().toString());
-                    currentZoomCalculator2 = new F2ZoomCaculator(constant);
+                    currentZoomCalculator2 = new F2ZoomCalculator(constant);
                 } else if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("screen speed")) {
                     formula = 3;
                     constant = 0.256;
                     if (!constantEditText.getText().toString().equals(""))
                         constant = Double.parseDouble(constantEditText.getText().toString());
-                    currentZoomCalculator2 = new F2ZoomCaculator(constant);
+                    currentZoomCalculator2 = new F2ZoomCalculator(constant);
                 }
             }
 
@@ -115,7 +115,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("default")) {
                     choice = 1;
-                } else if(parent.getItemAtPosition(position).toString().equalsIgnoreCase("time based speed")){
+                } else if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("time based speed")) {
                     choice = 2;
                 }
             }
@@ -149,7 +149,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(edinburgh));
         //mMap.moveCamera(CameraUpdateFactory.zoomTo(12));
 
-        isStartDrag = true;
         baseZoom = mMap.getCameraPosition().zoom;
     }
 
@@ -182,11 +181,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void noDrag() {
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), 500, null);
-        isStartDrag = true;
+        double tempZoom = baseZoom - mMap.getCameraPosition().zoom;
+        int time = (int) (tempZoom * 500);
+        int isZero = Double.compare(tempZoom,0.0);
+        if(time > 0) {
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), time, new GoogleMap.CancelableCallback() {
+                @Override
+                public void onFinish() {
+                    isStartDrag = true;
+                    System.out.println("Finset");
+                }
+
+                @Override
+                public void onCancel() {
+                }
+            });
+        } else if(isZero == 0)    {
+            isStartDrag = true;
+        }
         squeue.clear();
         gqueue.clear();
-        mTapTextView.setText("Current: " + mMap.getCameraPosition().zoom);
+        mTapTextView.setText("Current: " + mMap.getCameraPosition().zoom + " time: " + time + " zoom: " + tempZoom);
+        System.out.println("Current: " + mMap.getCameraPosition().zoom + " time: " + time + " zoom: " + tempZoom);
     }
 
     @Override
@@ -203,11 +219,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mCameraTextView.append(screenPoint.x + "," + screenPoint.y + " speedX: " + speedX + " speedY " + speedY);
 
         float curZoom = mMap.getCameraPosition().zoom;
-        float tempZoom = curZoom + (baseZoom - curZoom)/4;
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, tempZoom), 500, new GoogleMap.CancelableCallback() {
+
+        double speed = Math.sqrt(Math.pow(speedX, 2) + Math.pow(speedY, 2))*0.001;
+        /*speed = speed/Math.pow(2,curZoom);
+        F2ZoomCalculator f2 = new F2ZoomCalculator(16);
+        double zoomLevel = f2.getZoom(speed, baseZoom);*/
+
+        /*float tempZoom = baseZoom - curZoom;
+        if(tempZoom > 0.25) tempZoom = (float) 0.25;*/
+        final float restZoom = baseZoom - curZoom + (float) (speed/16);// - tempZoom;
+        //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, (curZoom + tempZoom)), 250, new GoogleMap.CancelableCallback() {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, (float) (curZoom - (speed/16))), 250, new GoogleMap.CancelableCallback() {
+        //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, (float) zoomLevel), 250, new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), 4000, null);
+                if(restZoom > 0)
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), (int) (restZoom*4000) , null);
             }
 
             @Override
@@ -247,7 +274,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mTapTextView.setText("Current: " + currentCamera.zoom + " ZL: " + zoomLevel + " base: " + baseZoom);
 
-        F2ZoomCaculator fo2 = new F2ZoomCaculator(0.36);
+        F2ZoomCalculator fo2 = new F2ZoomCalculator(0.36);
         double zoomLevel1 = fo2.getZoom(groundSpeed, baseZoom);
         String string = "Gspeed: "+groundSpeed+" Sspeed: " + screenSpeed + " zoomLv1: " + zoomLevel + " zoomLv2: " + zoomLevel1 + " base: " + baseZoom;
         System.out.println(string);
@@ -297,8 +324,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(!constantEditText.getText().toString().equals(""))
             if(constant != Double.parseDouble(constantEditText.getText().toString())){
                 constant = Double.parseDouble(constantEditText.getText().toString());
-                if(formula == 1)    currentZoomCalculator1 = new F1ZoomCaculator(constant);
-                else if(formula == 2 || formula == 3)   currentZoomCalculator2 = new F2ZoomCaculator(constant);
+                if(formula == 1)    currentZoomCalculator1 = new F1ZoomCalculator(constant);
+                else if(formula == 2 || formula == 3)   currentZoomCalculator2 = new F2ZoomCalculator(constant);
             }
 
         if(isStartDrag){
