@@ -16,7 +16,7 @@
         android:background="@color/white"
         android:orientation="vertical" >
 
-        <TextView
+        <!-- <TextView
             android:id="@+id/tap_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -29,7 +29,7 @@
         <TextView
             android:id="@+id/drag_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" /> -->
 
         <LinearLayout
         android:layout_width="match_parent"
@@ -70,6 +70,34 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:gravity="center" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:weightSum="1" >
+            <EditText
+                android:id="@+id/zoomGearing_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:hint="@string/zoom_gearing"
+                android:inputType="numberDecimal" />
+            <EditText
+                android:id="@+id/zoomRateDrag_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:hint="@string/zoom_rate_drag"
+                android:inputType="numberDecimal" />
+            <EditText
+                android:id="@+id/zoomRateFling_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:hint="@string/zoom_rate_fling"
+                android:inputType="numberDecimal" />
         </LinearLayout>
 
     </LinearLayout>

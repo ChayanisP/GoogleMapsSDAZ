@@ -6,9 +6,11 @@
     <string name="tap_instructions">Tap or long press</string>
     <string name="constant">Constant</string>
     <string name="time">Time (second)</string>
+    <string name="zoom_gearing">Zoom gearing</string>
+    <string name="zoom_rate_drag">Drag zoom rate</string>
+    <string name="zoom_rate_fling">Fling zoom rate</string>
     <string-array name="eqs_array">
-        <item>Ground speed 1</item>
-        <item>Ground speed 2</item>
+        <item>Ground speed</item>
         <item>Screen speed</item>
     </string-array>
     <string-array name="tspd_array">
