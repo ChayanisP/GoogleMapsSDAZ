@@ -239,8 +239,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         double speed = Math.sqrt(Math.pow(speedX, 2) + Math.pow(speedY, 2))*0.001;
 
-        final float restZoom = baseZoom - curZoom + (float) ((speed-0.3) / 15.7);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, (float) (curZoom - ((speed-0.3) / 15.7))), 250, new GoogleMap.CancelableCallback() {
+        float zoomChange = (float) Math.max(((speed-0.3) / 15.7),0);
+        final float toZoom = baseZoom - curZoom + zoomChange;
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, (curZoom - zoomChange)), 250, new GoogleMap.CancelableCallback() {
             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, (float) zoomLevel), 250, new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
@@ -249,8 +250,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 double flingZoomRate=0.25;
                 if(!zoomRateFlingEditText.getText().toString().equals(""))
                     flingZoomRate = Double.parseDouble(zoomRateFlingEditText.getText().toString());
-                if (restZoom > 0)
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), (int) (restZoom * 1000/flingZoomRate), null);
+                if (toZoom > 0)
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(baseZoom), (int) (toZoom * 1000/flingZoomRate), null);
             }
 
             @Override
