@@ -19,14 +19,14 @@
         <!-- <TextView
             android:id="@+id/tap_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" /> -->
 
-        <TextView
+        <!-- <TextView
             android:id="@+id/camera_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" /> -->
 
-        <TextView
+        <!-- <TextView
             android:id="@+id/drag_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" /> -->

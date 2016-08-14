@@ -4,17 +4,17 @@
     <string name="move_the_camera">Move the camera</string>
     <string name="isDrag">is drag?</string>
     <string name="tap_instructions">Tap or long press</string>
-    <string name="constant">Constant</string>
-    <string name="time">Time (second)</string>
+    <string name="constant">Zoom threshold</string>
+    <string name="time">Smoothing time</string>
     <string name="zoom_gearing">Zoom gearing</string>
-    <string name="zoom_rate_drag">Drag zoom rate</string>
-    <string name="zoom_rate_fling">Fling zoom rate</string>
+    <string name="zoom_rate_drag">Drag return</string>
+    <string name="zoom_rate_fling">Fling return</string>
     <string-array name="eqs_array">
         <item>Ground speed</item>
         <item>Screen speed</item>
     </string-array>
     <string-array name="tspd_array">
-        <item>Default</item>
-        <item>Time based speed</item>
+        <item>Instantaneous</item>
+        <item>Smoothed</item>
     </string-array>
 </resources>

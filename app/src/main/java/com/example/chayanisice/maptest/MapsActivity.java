@@ -67,9 +67,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        /*mTapTextView = (TextView) findViewById(R.id.tap_text);
-        mCameraTextView = (TextView) findViewById(R.id.camera_text);
-        dragDetection = (TextView) findViewById(R.id.drag_text);*/
+        //mTapTextView = (TextView) findViewById(R.id.tap_text);
+        //mCameraTextView = (TextView) findViewById(R.id.camera_text);
+        //dragDetection = (TextView) findViewById(R.id.drag_text);
         constantEditText = (EditText) findViewById(R.id.constant_text);
         timeEditText = (EditText) findViewById(R.id.time_text);
         zoomGearingEditText = (EditText) findViewById(R.id.zoomGearing_text);
@@ -92,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     currentZoomCalculator = new F1ZoomCalculator(constant);
                 } else if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("screen speed")) {
                     formula = 2;
-                    constant = 0.256;
+                    constant = 0.06;
                     if (!constantEditText.getText().toString().equals(""))
                         constant = Double.parseDouble(constantEditText.getText().toString());
                     currentZoomCalculator = new F1ZoomCalculator(constant);
@@ -113,9 +113,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         spinner1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("default")) {
+                if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("Instantaneous")) {
                     choice = 1;
-                } else if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("time based speed")) {
+                } else if (parent.getItemAtPosition(position).toString().equalsIgnoreCase("Smoothed")) {
                     choice = 2;
                 }
             }
@@ -164,14 +164,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onCameraChange(final CameraPosition position) {
-        //mCameraTextView.setText(position.target.toString());
+        //mCameraTextView.setText(position.zoom+"");
+        System.out.println("Normal: Zoom level: "+ position.zoom+" time: "+System.currentTimeMillis());
     }
 
     @Override
     public void onDrag(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        //mCameraTextView.setText("Formula: " + formula + " " + constant);
-        System.out.println("CurrentZoom: "+mMap.getCameraPosition().zoom);
-
         if(!constantEditText.getText().toString().equals(""))
             if(constant != Double.parseDouble(constantEditText.getText().toString())){
                 constant = Double.parseDouble(constantEditText.getText().toString());
@@ -185,13 +183,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double zoomLevel = getZoomLevel();
         mMap.animateCamera(CameraUpdateFactory.zoomTo((float) zoomLevel), 10, null);
 
-        System.out.println("CurrentZoom: " + mMap.getCameraPosition().zoom);
     }
 
     @Override
     public void noDrag() {
-        System.out.println("CurrentZoom: "+mMap.getCameraPosition().zoom);
-
         double tempZoom = baseZoom - mMap.getCameraPosition().zoom;
         double dragZoomRate=2;
         if(!zoomRateDragEditText.getText().toString().equals(""))
@@ -216,17 +211,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         gqueue.clear();
         //mTapTextView.setText("Current: " + mMap.getCameraPosition().zoom + " time: " + time + " zoom: " + tempZoom);
         //System.out.println("Current: " + mMap.getCameraPosition().zoom + " time: " + time + " zoom: " + tempZoom);
-
-        System.out.println("CurrentZoom: "+mMap.getCameraPosition().zoom);
     }
 
     @Override
     public void onFling(double speedX, double speedY) {
-        System.out.println("CurrentZoom: " + mMap.getCameraPosition().zoom);
-
-        //mCameraTextView.setText("Fling");
         squeue.clear();
-        //gqueue.clear();
 
         LatLng currentTarget = mMap.getCameraPosition().target;
         Point screenPoint = mMap.getProjection().toScreenLocation(currentTarget);
@@ -258,9 +247,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onCancel() {
             }
         });
-
-        //mTapTextView.setText("Current1: " + mMap.getCameraPosition().zoom);
-        System.out.println("CurrentZoom: "+mMap.getCameraPosition().zoom);
     }
 
     public double getZoomLevel(){
@@ -290,7 +276,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //mTapTextView.setText("Current: " + currentCamera.zoom + " ZL: " + zoomLevel + " base: " + baseZoom);
 
-        F1ZoomCalculator fo3 = new F1ZoomCalculator(0.256);
+        F1ZoomCalculator fo3 = new F1ZoomCalculator(0.06);
         double zoomLevel2 = fo3.getZoomScreen(screenSpeed, baseZoom, currentCamera.zoom, zoomGearing);
         double zoomLv2time = fo3.getZoomScreen(timeBasedScreenSpeed, baseZoom, currentCamera.zoom, zoomGearing);
         double zoomLvtime = currentZoomCalculator.getZoomGround(timeBasedGroundSpeed, baseZoom, currentCamera.zoom, zoomGearing);
@@ -298,7 +284,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String string = "Gspeed: "+groundSpeed+" Sspeed: " + screenSpeed +
                 " zoomLv1: " + zoomLevel + " zoomLv2: " + zoomLevel2 +
                 " tzoomLv1: " + zoomLvtime + " tzoomLv2: " + zoomLv2time +
-                " base: " + baseZoom;
+                " base: " + baseZoom + "time: "+System.currentTimeMillis();
         System.out.println(string);
 
         //------------------
