@@ -9,15 +9,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -27,12 +24,9 @@ import com.google.android.gms.maps.model.CameraPosition;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnMapClickListener, OnMapLongClickListener, OnCameraChangeListener, DragCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCameraChangeListener, DragCallback {
 
     private GoogleMap mMap;
-    private TextView mTapTextView;
-    private TextView mCameraTextView;
-    private TextView dragDetection;
     private EditText constantEditText;
     private EditText timeEditText;
     private EditText zoomGearingEditText;
@@ -66,10 +60,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        //mTapTextView = (TextView) findViewById(R.id.tap_text);
-        //mCameraTextView = (TextView) findViewById(R.id.camera_text);
-        //dragDetection = (TextView) findViewById(R.id.drag_text);
         constantEditText = (EditText) findViewById(R.id.constant_text);
         timeEditText = (EditText) findViewById(R.id.time_text);
         zoomGearingEditText = (EditText) findViewById(R.id.zoomGearing_text);
@@ -138,33 +128,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnCameraChangeListener(this);
-        mMap.setOnMapClickListener(this);
-        mMap.setOnMapLongClickListener(this);
 
         LatLng edinburgh = new LatLng(55.95, -3.19);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        //mMap.getUiSettings().setZoomGesturesEnabled(false);
         mMap.addMarker(new MarkerOptions().position(edinburgh).title("Marker in Edinburgh"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(edinburgh));
-        //mMap.moveCamera(CameraUpdateFactory.zoomTo(12));
 
         baseZoom = mMap.getCameraPosition().zoom;
     }
 
     @Override
-    public void onMapClick(LatLng point) {
-        //mTapTextView.setText("tapped, point=" + point);
-    }
-
-    @Override
-    public void onMapLongClick(LatLng point) {
-        //mTapTextView.setText("long pressed, point=" + point);
-    }
-
-    @Override
     public void onCameraChange(final CameraPosition position) {
-        //mCameraTextView.setText(position.zoom+"");
         System.out.println("Normal: Zoom level: "+ position.zoom+" time: "+System.currentTimeMillis());
     }
 
@@ -209,8 +183,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         squeue.clear();
         gqueue.clear();
-        //mTapTextView.setText("Current: " + mMap.getCameraPosition().zoom + " time: " + time + " zoom: " + tempZoom);
-        //System.out.println("Current: " + mMap.getCameraPosition().zoom + " time: " + time + " zoom: " + tempZoom);
     }
 
     @Override
@@ -221,17 +193,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Point screenPoint = mMap.getProjection().toScreenLocation(currentTarget);
         Point newPoint = new Point(screenPoint.x - (int)(speedX/4), screenPoint.y - (int)(speedY/4));
         LatLng mapNewTarget = mMap.getProjection().fromScreenLocation(newPoint);
-
-        //mCameraTextView.append(screenPoint.x + "," + screenPoint.y + " speedX: " + speedX + " speedY " + speedY);
-
         float curZoom = mMap.getCameraPosition().zoom;
-
         double speed = Math.sqrt(Math.pow(speedX, 2) + Math.pow(speedY, 2))*0.001;
-
         float zoomChange = (float) Math.max(((speed-0.3) / 15.7),0);
         final float toZoom = baseZoom - curZoom + zoomChange;
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, (curZoom - zoomChange)), 250, new GoogleMap.CancelableCallback() {
-            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapNewTarget, (float) zoomLevel), 250, new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
                 System.out.println("CurrentZoom: " + mMap.getCameraPosition().zoom);
@@ -272,23 +238,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 break;
         }
 
-        //-------print------
-
-        //mTapTextView.setText("Current: " + currentCamera.zoom + " ZL: " + zoomLevel + " base: " + baseZoom);
-
-        F1ZoomCalculator fo3 = new F1ZoomCalculator(0.06);
-        double zoomLevel2 = fo3.getZoomScreen(screenSpeed, baseZoom, currentCamera.zoom, zoomGearing);
-        double zoomLv2time = fo3.getZoomScreen(timeBasedScreenSpeed, baseZoom, currentCamera.zoom, zoomGearing);
-        double zoomLvtime = currentZoomCalculator.getZoomGround(timeBasedGroundSpeed, baseZoom, currentCamera.zoom, zoomGearing);
-
-        String string = "Gspeed: "+groundSpeed+" Sspeed: " + screenSpeed +
-                " zoomLv1: " + zoomLevel + " zoomLv2: " + zoomLevel2 +
-                " tzoomLv1: " + zoomLvtime + " tzoomLv2: " + zoomLv2time +
-                " base: " + baseZoom + "time: "+System.currentTimeMillis();
-        System.out.println(string);
-
-        //------------------
-
         return zoomLevel;
     }
 
@@ -315,8 +264,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
         if((event.getTime() - squeue.peek().getTime())==0)  timeBasedScreenSpeed = 0;
         else timeBasedScreenSpeed = dist/(event.getTime() - squeue.peek().getTime());
-
-        //dragDetection.setText("one sec speed: " + timeBasedScreenSpeed + " size: " + squeue.size()+" time: "+inputTime);
 
         double distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
         if((ptime - e2.getEventTime())==0)   screenSpeed = 0;
@@ -355,8 +302,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if((e2.getTime() - gqueue.peek().getTime())==0)  timeBasedGroundSpeed = 0;
         else timeBasedGroundSpeed = dist/(e2.getTime() - gqueue.peek().getTime());
 
-        //dragDetection.append("one sec speed: " + timeBasedGroundSpeed + " size: " + gqueue.size()+" time: "+inputTime);
-
         double LatDiff = Math.abs(prevPos.latitude - currentCamera.target.latitude);
         double LngDiff = Math.abs(prevPos.longitude - currentCamera.target.longitude);
         double distance = Math.sqrt(Math.pow(LatDiff, 2) + Math.pow(LngDiff, 2));
@@ -370,6 +315,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         prevPos = currentCamera.target;
         prevTime = currentTime;
     }
-
-
 }

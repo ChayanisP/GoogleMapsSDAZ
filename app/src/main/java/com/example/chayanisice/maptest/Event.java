@@ -22,9 +22,7 @@ public class Event {
         this.posX = posX;
     }
 
-    public double getPosY() {
-        return posY;
-    }
+    public double getPosY() { return posY; }
 
     public void setPosY(float posY) {
         this.posY = posY;

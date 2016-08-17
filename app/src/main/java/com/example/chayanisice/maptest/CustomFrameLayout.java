@@ -66,7 +66,6 @@ public class CustomFrameLayout extends FrameLayout {
             if(dragListener != null) {
                 isFling = true;
                 dragListener.onFling(velocityX, velocityY);
-
             }
             return false;
         }
